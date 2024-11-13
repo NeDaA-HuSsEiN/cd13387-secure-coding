@@ -15,6 +15,13 @@ void bytes_to_hex(const unsigned char* bytes, size_t len, char* hex_str) {
     hex_str[len * 2] = '\0';
 }
 
+void hexStringToBytes(const char *hex_str, unsigned char *bytes) {  
+    size_t length = strlen(hex_str);  
+    for (size_t i = 0; i < length; i += 2) {  
+        sscanf(hex_str + i, "%2hhx", &bytes[i / 2]);  
+    }  
+} 
+
 // Function to hash password with SHA-256
 void hash_password(const char* password, const unsigned char* salt, char* hashed_password) {
     unsigned char hash[SHA256_DIGEST_LENGTH];

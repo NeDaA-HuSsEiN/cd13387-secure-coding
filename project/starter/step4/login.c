@@ -66,7 +66,8 @@ int check_login(const char* username, const char* password) {
     char line[MAX_LINE_LENGTH];
     char file_username[MAX_USERNAME_LENGTH];
     char file_hashed_password[MAX_HASH_LENGTH];
-    char file_salt[SALT_LENGTH];
+    char file_salt[SALT_LENGTH * 2 + 1];
+    char salt_bytes[SALT_LENGTH];
     int failed_attempts;
 
     while (fgets(line, sizeof(line), file)) {
@@ -83,8 +84,11 @@ int check_login(const char* username, const char* password) {
                 update_failed_attempts(username, failed_attempts);
             }
 
+            // Convert salt to bytes
+            hex_to_bytes(file_salt, strlen(file_salt), salt_bytes);
+
             char hashed_input[MAX_HASH_LENGTH];
-            hash_password(password, file_salt, hashed_input);
+            hash_password(password, salt_bytes, hashed_input);
        
             if (strcmp(hashed_input, file_hashed_password) == 0) {
                 update_failed_attempts(username, 0);  // Reset failed attempts after a successful login
