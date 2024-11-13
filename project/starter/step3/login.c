@@ -31,7 +31,8 @@ int check_login(const char* username, const char* password) {
     char line[MAX_LINE_LENGTH];
     char file_username[MAX_USERNAME_LENGTH];
     char file_hashed_password[MAX_HASH_LENGTH];
-    char file_salt[SALT_LENGTH];
+    char file_salt[SALT_LENGTH * 2 + 1];
+    char salt_bytes[SALT_LENGTH];
 
     while (fgets(line, sizeof(line), file)) {
         // Remove the newline character
@@ -55,9 +56,12 @@ int check_login(const char* username, const char* password) {
         // Compare entered username and password with the file's values
         if (strcmp(username, file_username) == 0) {
 
+            // Convert salt to bytes
+            hex_to_bytes(file_salt, strlen(file_salt), salt_bytes);
+
            // Hash the input password with the stored salt
             char hashed_input[MAX_HASH_LENGTH];
-            hash_password(password, file_salt, hashed_input);
+            hash_password(password, salt_bytes, hashed_input);
   
             // Compare hashed input with the stored hashed password
             if (strcmp(hashed_input, file_hashed_password) == 0) {

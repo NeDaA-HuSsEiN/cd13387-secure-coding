@@ -15,6 +15,22 @@ void bytes_to_hex(const unsigned char* bytes, size_t len, char* hex_str) {
     hex_str[len * 2] = '\0';
 }
 
+// Function to convert a hexadecimal string to bytes
+void hex_to_bytes(const char* hex_str, size_t len, unsigned char* bytes) {
+     
+    for (size_t i = 0; i < len/2; i++) {
+        // Convert each pair of hexadecimal characters to a byte
+        sscanf(hex_str + (i * 2), "%2hhx", &bytes[i]);
+    }
+}
+
+void hexStringToBytes(const char *hex_str, unsigned char *bytes) {  
+    size_t length = strlen(hex_str);  
+    for (size_t i = 0; i < length; i += 2) {  
+        sscanf(hex_str + i, "%2hhx", &bytes[i / 2]);  
+    }  
+} 
+
 // Function to hash password with SHA-256
 void hash_password(const char* password, const unsigned char* salt, char* hashed_password) {
     unsigned char hash[SHA256_DIGEST_LENGTH];
