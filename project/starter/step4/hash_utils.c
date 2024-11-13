@@ -5,7 +5,7 @@
 #include <time.h>
 
 #define SALT_LENGTH 2
-#define MAX_PASSWORD_LENGTH 50
+#define MAX_HASH_LENGTH 65
 
 // Function to convert bytes to a hexadecimal string
 void bytes_to_hex(const unsigned char* bytes, size_t len, char* hex_str) {
@@ -27,7 +27,7 @@ void hex_to_bytes(const char* hex_str, size_t len, unsigned char* bytes) {
 // Function to hash password with SHA-256
 void hash_password(const char* password, const unsigned char* salt, char* hashed_password) {
     unsigned char hash[SHA256_DIGEST_LENGTH];
-    char salted_password[SALT_LENGTH];
+    char salted_password[MAX_HASH_LENGTH + SALT_LENGTH];
 
     // Prepend the salt to the password
     memcpy(salted_password, salt, SALT_LENGTH);
