@@ -4,5 +4,5 @@
 void bytes_to_hex(const unsigned char* bytes, size_t len, char* hex_str);
 void hash_password(const char* password, const unsigned char* salt, char* hashed_password);
 void generate_salt(unsigned char* salt, size_t length);
-void hexStringToBytes(const char *hex_str, unsigned char *bytes);
+void hex_to_bytes(const char* hex_str, size_t len, unsigned char* bytes);
 #endif
