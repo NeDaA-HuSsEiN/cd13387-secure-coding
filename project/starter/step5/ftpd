@@ -1,6 +1,6 @@
 service ftp
 {
-    disable = no
+    disable = yes
     socket_type = stream
     wait = no
     user = root

@@ -5,7 +5,7 @@ FROM gcc:latest
 RUN apt-get update && \
     apt-get install -y build-essential net-tools nmap \
 #    telnetd ftpd rsh-server net-tools nmap xinetd
-    openbsd-inetd telnetd proftpd rsh-server inetutils-ping telnet \
+   # openbsd-inetd telnetd proftpd rsh-server inetutils-ping telnet \
     && apt-get purge -y inet-superserver \
     && apt-get install -y xinetd
 
@@ -27,14 +27,15 @@ RUN echo "ALL: ALL" >> /etc/hosts.allow && \
 
 
 # Configure xinetd to start services
-COPY xinetd.conf /etc/xinetd.conf
-COPY telnetd /etc/xinetd.d/telnet
-COPY ftpd /etc/xinetd.d/ftp
-COPY rlogind /etc/xinetd.d/rlogin
+#COPY xinetd.conf /etc/xinetd.conf
+#COPY telnetd /etc/xinetd.d/telnet
+#COPY ftpd /etc/xinetd.d/ftp
+#COPY rlogind /etc/xinetd.d/rlogin
 
 
 # Start xinetd and the services
-CMD ["/bin/bash", "-c", "service xinetd start && /usr/sbin/proftpd && /bin/bash"]
+#CMD ["/bin/bash", "-c", "service xinetd start && /usr/sbin/proftpd && /bin/bash"]
+CMD ["/bin/bash", "-c", "service xinetd start && /bin/bash"]
 
 # Make start.sh executable
 RUN chmod +x /app/start.sh
