@@ -22,6 +22,43 @@ void trim_newline(char* str) {
         *pos = '\0';
 }
 
+// Function to read the count value for a specific user
+int read_fail_count_for_user(const char* target_username) {
+    FILE* file = fopen(FILE_USERS, "r");
+    if (file == NULL) {
+        printf("Could not open the file.\n");
+        return -1;  // Return -1 to indicate an error
+    }
+
+    char line[MAX_LINE_LENGTH];
+    int value = 0;
+
+    // Read each line to find the target username
+    while (fgets(line, sizeof(line), file) != NULL) {
+        // Remove newline character
+        line[strcspn(line, "\n")] = '\0';
+
+        // Copy line to preserve original data while tokenizing
+        char line_copy[MAX_LINE_LENGTH];
+        strcpy(line_copy, line);
+
+        // Get the username from the line
+        char* token = strtok(line_copy, ":");
+        if (token != NULL && strcmp(token, target_username) == 0) {
+            // If username matches, find the last section after the last delimiter
+            char* last_delim = strrchr(line, ':');
+            if (last_delim != NULL) {
+                // Convert the value after the last delimiter to an integer
+                value = atoi(last_delim + 1);
+            }
+            break;  // User found, no need to continue reading
+        }
+    }
+
+    fclose(file);
+    return value;
+}
+
 // Function to update a specific user's row
 void overwrite_last_section_for_user(char* line, const char* target_username, int new_value) {
     // Copy the line to avoid modifying the original
@@ -144,7 +181,6 @@ int main() {
     char username[MAX_USERNAME_LENGTH];
     char password[MAX_PASSWORD_LENGTH];
     char command[MAX_COMMAND_LENGTH];
-    int fail_attempts = 0;
     int exit_flag = 0;
     
     while(1){
@@ -157,10 +193,12 @@ int main() {
         fgets(password, sizeof(password), stdin);
         trim_newline(password);  // Remove newline character
 
+        int fail_attempts =  read_fail_count_for_user(username);
+        
         // Check login credentials
         if (check_login(username, password)) {
             printf("Login successful!\n");
-            fail_attempts = 0;
+
             update_failed_attempts(username, fail_attempts);
 
             // Command prompt loop
