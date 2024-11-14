@@ -35,7 +35,7 @@ void overwrite_last_section_for_user(char* line, const char* target_username, in
     // Check if the username matches the target
     if (strcmp(token, target_username) == 0) {
         // Find the last occurrence of the delimiter in the original line
-        char* last_delim = strrchr(line, ":");
+        char* last_delim = strrchr(line, ':');
         
         if (last_delim != NULL) {
             // Move past the last delimiter and overwrite with new integer value
