@@ -15,30 +15,6 @@ void trim_newline(char* str) {
         *pos = '\0';
 }
 
-void check_sensors() {
-    int sensor1;
-    int sensor2;
-
-    //read from memory
-    sensor1=1;
-    sensor2=2;
-    return;
-}
-
-int compare_values(int sensor1, int sensor2) {
-    int status;
-    if (sensor1 < sensor2) {
-      //system is working 
-      printf("system is working in acceptable range\n");
-      status=0;
-    } else {
-      //system is overloaded
-      printf("Warning - system is overloaded\n");
-      status=1;
-    }
-    return status;
-}
-
 void debug_mode() {
     int sensor1;
     int sensor2;
@@ -86,7 +62,6 @@ int check_login(const char* username, const char* password) {
         if (strcmp(username, file_username) == 0 && strcmp(password, file_password) == 0) {
             fclose(file);
             return 1;  // Login successful
-            check_sensors();
         }
     }
 
