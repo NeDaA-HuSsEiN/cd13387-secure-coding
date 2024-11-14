@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h>  // For sleep
-#include <time.h>    // For tracking lockout time
+#include <unistd.h> 
 #include "hash_utils.h"
 
 #define MAX_LINE_LENGTH 200
@@ -12,7 +11,7 @@
 #define MAX_HASH_LENGTH 65
 #define SALT_LENGTH 2
 #define LOCKOUT_THRESHOLD 3
-#define LOCKOUT_DURATION 5  // in seconds
+#define LOCKOUT_TIMEOUT 5  // in seconds
 
 #define FILE_USERS "hashed_users.txt"
 
@@ -23,42 +22,76 @@ void trim_newline(char* str) {
         *pos = '\0';
 }
 
+// Function to update a specific user's row
+void overwrite_last_section_for_user(char* line, const char* target_username, int new_value) {
+    // Copy the line to avoid modifying the original
+    char line_copy[MAX_LINE_LENGTH];
+    strcpy(line_copy, line);
+
+    // Get the username from the line
+    char* token = strtok(line_copy, ":");
+    if (token == NULL) return;
+
+    // Check if the username matches the target
+    if (strcmp(token, target_username) == 0) {
+        // Find the last occurrence of the delimiter in the original line
+        char* last_delim = strrchr(line, ":");
+        
+        if (last_delim != NULL) {
+            // Move past the last delimiter and overwrite with new integer value
+            last_delim++;
+            sprintf(last_delim, "%d", new_value);
+        }
+    }
+}
+
 // Function to update the user's failed attempts count in hashed_users.txt
 void update_failed_attempts(const char* username, int attempts) {
-    FILE* file = fopen(FILE_USERS, "r+");
-    if (!file) {
-        printf("Could not open %s\n", FILE_USERS);
-        return;
+
+    FILE *file = fopen(FILE_USERS, "r");
+    if (file == NULL) {
+        printf("Could not open the file.\n");
+        return 1;
+    }
+
+    // Temporary file to store modified lines
+    FILE *temp_file = fopen("temp.txt", "w");
+    if (temp_file == NULL) {
+        printf("Could not open the temporary file.\n");
+        fclose(file);
+        return 1;
     }
 
     char line[MAX_LINE_LENGTH];
-    long position;
-    while ((position = ftell(file)), fgets(line, sizeof(line), file)) {
+
+    // Read each line from the file
+    while (fgets(line, sizeof(line), file) != NULL) {
+        // Remove newline character at the end of the line
         trim_newline(line);
 
-        char file_username[MAX_USERNAME_LENGTH];
-        char file_salt[SALT_LENGTH * 2 + 1];
-        char file_hashed_password[MAX_HASH_LENGTH];
-        int file_attempts;
+        // Update only the target user's row
+        overwrite_last_section_for_user(line, username, attempts);
 
-        // Parse line into fields
-        sscanf(line, "%[^:]:%[^:]:%[^:]:%d", file_username, file_salt, file_hashed_password, &file_attempts);
-
-        if (strcmp(username, file_username) == 0) {
-            fseek(file, position, SEEK_SET);
-            fprintf(file, "%s:%s:%s:%d\n", file_username, file_salt, file_hashed_password, attempts);
-            break;
-        }
+        // Write the (possibly modified) line to the temporary file
+        fprintf(temp_file, "%s\n", line);
     }
 
+    // Close both files
     fclose(file);
-}
+    fclose(temp_file);
 
-// Function to check if username and password match an entry in hashed_users.txt
+    // Replace the original file with the temporary file
+    remove(FILE_USERS);
+    rename("temp.txt", FILE_USERS);
+
+    printf("File updated successfully for user: %s\n", username);
+}
+// Function to check if username and password match an entry in users.txt
 int check_login(const char* username, const char* password) {
+
     FILE* file = fopen(FILE_USERS, "r");
     if (file == NULL) {
-        printf("Could not open %s\n", FILE_USERS);
+        printf("Could not open users.txt\n");
         return 0;
     }
 
@@ -67,90 +100,98 @@ int check_login(const char* username, const char* password) {
     char file_hashed_password[MAX_HASH_LENGTH];
     char file_salt[SALT_LENGTH * 2 + 1];
     char salt_bytes[SALT_LENGTH];
-    int failed_attempts;
 
     while (fgets(line, sizeof(line), file)) {
+        // Remove the newline character
         trim_newline(line);
 
-        sscanf(line, "%[^:]:%[^:]:%[^:]:%d", file_username, file_salt, file_hashed_password, &failed_attempts);
-
-        if (strcmp(username, file_username) == 0) {
-            if (failed_attempts >= LOCKOUT_THRESHOLD) {
-                fclose(file);
-                return -1;  // User is locked out
+        // Split the line into username, salt, and hashed password
+        char* token = strtok(line, ":");
+        if (token != NULL) {
+            strcpy(file_username, token);
+            token = strtok(NULL, ":");
+            if (token != NULL) {
+                strcpy(file_salt, token);
+                token = strtok(NULL, ":");
+                
+                if (token != NULL) {
+                    strcpy(file_hashed_password, token);
+                }
             }
+        }
+
+        // Compare entered username and password with the file's values
+        if (strcmp(username, file_username) == 0) {
 
             // Convert salt to bytes
             hex_to_bytes(file_salt, strlen(file_salt), salt_bytes);
 
-            // Hash the input password with the stored salt
+           // Hash the input password with the stored salt
             char hashed_input[MAX_HASH_LENGTH];
             hash_password(password, salt_bytes, hashed_input);
-
+  
             // Compare hashed input with the stored hashed password
             if (strcmp(hashed_input, file_hashed_password) == 0) {
                 fclose(file);
                 return 1;  // Login successful
-            } else {
-                fclose(file);
-                return 0;  // Login failed, but not locked out
             }
         }
     }
 
     fclose(file);
-    return 0;  // Login failed, user not found
-}
-
-void lockout_check(const char* username, int* attempts, time_t* last_attempt_time) {
-    time_t current_time = time(NULL);
-
-    if (*attempts >= LOCKOUT_THRESHOLD) {
-        double time_elapsed = difftime(current_time, *last_attempt_time);
-
-        if (time_elapsed < LOCKOUT_DURATION) {
-            printf("Account locked. Try again in %d seconds.\n", LOCKOUT_DURATION - (int)time_elapsed);
-            sleep(LOCKOUT_DURATION - (int)time_elapsed);
-        }
-        
-        *attempts = LOCKOUT_THRESHOLD;  // Keep threshold in file if already locked
-    } else {
-        *last_attempt_time = current_time;
-    }
+    return 0;  // Login failed
 }
 
 int main() {
     char username[MAX_USERNAME_LENGTH];
     char password[MAX_PASSWORD_LENGTH];
     char command[MAX_COMMAND_LENGTH];
-    int attempts = 0;
-    time_t last_attempt_time = 0;
+    int fail_attempts = 0;
+    int exit_flag = 0;
+    
+    while(1){
+        // Prompt user for username and password
+        printf("Enter username: ");
+        fgets(username, sizeof(username), stdin);
+        trim_newline(username);  // Remove newline character
 
-    printf("Enter username: ");
-    fgets(username, sizeof(username), stdin);
-    trim_newline(username);
-
-    while (1) {
         printf("Enter password: ");
         fgets(password, sizeof(password), stdin);
-        trim_newline(password);
+        trim_newline(password);  // Remove newline character
 
-        lockout_check(username, &attempts, &last_attempt_time);
-
-        int login_result = check_login(username, password);
-
-        if (login_result == 1) {
+        // Check login credentials
+        if (check_login(username, password)) {
             printf("Login successful!\n");
-            update_failed_attempts(username, 0);  // Reset attempts on success
-            break;
-        } else if (login_result == -1) {
-            printf("Account is temporarily locked. Please wait.\n");
-            lockout_check(username, &attempts, &last_attempt_time);
+            fail_attempts = 0;
+            update_failed_attempts(username, fail_attempts);
+
+            // Command prompt loop
+            while (1) {
+                printf("> ");
+                scanf("%s", command);
+
+                if (strcmp(command, "exit") == 0) {
+                    exit_flag = 1;
+                    break;
+                } else {
+                    printf("Unknown command.\nAllowed command is exit.\n");
+                }
+            }
         } else {
             printf("Login failed.\n");
-            attempts++;
-            update_failed_attempts(username, attempts);
-            last_attempt_time = time(NULL);
+            fail_attempts++;
+            update_failed_attempts(username, fail_attempts);
+
+            if(fail_attempts >= LOCKOUT_THRESHOLD)
+            {
+                printf("Account is temporarily locked. Please wait.\n");
+                sleep(LOCKOUT_TIMEOUT);
+            }
+        }
+        
+        if(exit_flag)
+        {
+            break;
         }
     }
 
