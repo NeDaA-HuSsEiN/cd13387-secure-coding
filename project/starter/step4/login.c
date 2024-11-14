@@ -51,7 +51,7 @@ void update_failed_attempts(const char* username, int attempts) {
     FILE *file = fopen(FILE_USERS, "r");
     if (file == NULL) {
         printf("Could not open the file.\n");
-        return 1;
+        return;
     }
 
     // Temporary file to store modified lines
@@ -59,7 +59,7 @@ void update_failed_attempts(const char* username, int attempts) {
     if (temp_file == NULL) {
         printf("Could not open the temporary file.\n");
         fclose(file);
-        return 1;
+        return;
     }
 
     char line[MAX_LINE_LENGTH];
@@ -83,8 +83,6 @@ void update_failed_attempts(const char* username, int attempts) {
     // Replace the original file with the temporary file
     remove(FILE_USERS);
     rename("temp.txt", FILE_USERS);
-
-    printf("File updated successfully for user: %s\n", username);
 }
 // Function to check if username and password match an entry in users.txt
 int check_login(const char* username, const char* password) {
