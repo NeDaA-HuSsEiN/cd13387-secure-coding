@@ -46,12 +46,12 @@ int main() {
         // Split the line into username and password
         char* token = strtok(line, ":");
         if (token != NULL) {
-            strncpy(username, token, sizeof(username) - 1); //Fix buffer overflow
+            strncpy(username, token, sizeof(username) - 1);
             username[sizeof(username) - 1] = '\0';
 
             token = strtok(NULL, ":");
             if (token != NULL) {
-                strncpy(password, token, sizeof(password) - 1); //Fix buffer overflow
+                strncpy(password, token, sizeof(password) - 1);
                 password[sizeof(password) - 1] = '\0';
             }
         }

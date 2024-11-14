@@ -27,11 +27,11 @@ void hex_to_bytes(const char* hex_str, size_t len, unsigned char* bytes) {
 // Function to hash password with SHA-256
 void hash_password(const char* password, const unsigned char* salt, char* hashed_password) {
     unsigned char hash[SHA256_DIGEST_LENGTH];
-    char salted_password[MAX_HASH_LENGTH + SALT_LENGTH];
+    char salted_password[MAX_HASH_LENGTH + SALT_LENGTH]; // Fix buffer overflow
 
     // Prepend the salt to the password
     memcpy(salted_password, salt, SALT_LENGTH);
-    strcpy(salted_password + SALT_LENGTH, password);
+    strncpy(salted_password + SALT_LENGTH, password, sizeof(salted_password) - 1);
 
     // Hash the salted password
     SHA256((unsigned char*)salted_password, strlen(salted_password), hash);
