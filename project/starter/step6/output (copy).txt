@@ -1,3 +1,8 @@
 Error: Signature verification failed.
 40B7B4E5C57F0000:error:02000068:rsa routines:ossl_rsa_verify:bad signature:../crypto/rsa/rsa_sign.c:430:
 40B7B4E5C57F0000:error:1C880004:Provider routines:rsa_verify:RSA lib:../providers/implementations/signature/rsa_sig.c:774:
+
+
+
+# Verify the signature against the binary file
+openssl dgst -sha256 -verify <(openssl x509 -in software_update.crt -pubkey -noout) -signature software_update.sig software_update.bin
