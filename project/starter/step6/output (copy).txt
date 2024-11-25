@@ -6,3 +6,123 @@ Error: Signature verification failed.
 
 # Verify the signature against the binary file
 openssl dgst -sha256 -verify <(openssl x509 -in software_update.crt -pubkey -noout) -signature software_update.sig software_update.bin
+
+
+Here are a few things to check:
+
+1. Ensure Proper Key Loading in the C Code
+If you're manually verifying the signature successfully, the problem might be related to how the public key or the signature is being handled in your C code.
+
+Make sure you're loading the public key correctly from the software_update.crt in your C code.
+Ensure that you're using the correct signature file (software_update.sig) and data file (software_update.bin).
+You can use the following code snippet to ensure proper loading and checking of the public key in C:
+
+c
+Copy code
+// Load the public key from the certificate
+FILE *pubkey_file = fopen("software_update.crt", "r");
+if (!pubkey_file) {
+    perror("Unable to open public key file");
+    exit(1);
+}
+
+X509 *cert = PEM_read_X509(pubkey_file, NULL, NULL, NULL);
+if (!cert) {
+    fprintf(stderr, "Failed to read certificate\n");
+    exit(1);
+}
+
+EVP_PKEY *pubkey = X509_get_pubkey(cert);
+if (!pubkey) {
+    fprintf(stderr, "Failed to extract public key from certificate\n");
+    exit(1);
+}
+
+// Prepare the EVP context for verification
+EVP_MD_CTX *md_ctx = EVP_MD_CTX_new();
+if (!md_ctx) {
+    fprintf(stderr, "Failed to create EVP_MD_CTX\n");
+    exit(1);
+}
+
+// Initialize the EVP context with SHA256 algorithm
+if (EVP_DigestVerifyInit(md_ctx, NULL, EVP_sha256(), NULL, pubkey) != 1) {
+    fprintf(stderr, "EVP_DigestVerifyInit failed\n");
+    exit(1);
+}
+
+// Hash the data file (software_update.bin)
+FILE *update_file = fopen("software_update.bin", "rb");
+if (!update_file) {
+    perror("Unable to open update file");
+    exit(1);
+}
+
+unsigned char buffer[1024];
+size_t bytes_read;
+while ((bytes_read = fread(buffer, 1, sizeof(buffer), update_file)) > 0) {
+    if (EVP_DigestUpdate(md_ctx, buffer, bytes_read) != 1) {
+        fprintf(stderr, "EVP_DigestUpdate failed\n");
+        exit(1);
+    }
+}
+
+fclose(update_file);
+
+// Verify the signature using the signature file (software_update.sig)
+FILE *sig_file = fopen("software_update.sig", "rb");
+if (!sig_file) {
+    perror("Unable to open signature file");
+    exit(1);
+}
+
+fseek(sig_file, 0, SEEK_END);
+long sig_len = ftell(sig_file);
+fseek(sig_file, 0, SEEK_SET);
+
+unsigned char *sig = malloc(sig_len);
+if (!sig) {
+    fprintf(stderr, "Memory allocation for signature failed\n");
+    exit(1);
+}
+
+fread(sig, 1, sig_len, sig_file);
+fclose(sig_file);
+
+// Verify the signature
+int verify_status = EVP_DigestVerify(md_ctx, sig, sig_len);
+if (verify_status == 1) {
+    printf("Signature verification succeeded\n");
+} else {
+    printf("Signature verification failed\n");
+}
+
+EVP_MD_CTX_free(md_ctx);
+EVP_PKEY_free(pubkey);
+X509_free(cert);
+free(sig);
+2. Ensure Correct Hashing and Signature Processing in the C Code
+Make sure that:
+
+The file (software_update.bin) is being hashed correctly.
+The signature (software_update.sig) is being read and passed correctly to the EVP_DigestVerify function.
+In OpenSSL, the EVP_DigestVerify function takes the hash of the data and compares it with the provided signature. You need to ensure that both the data and signature are correctly loaded, as seen in the OpenSSL command.
+
+3. Debugging
+To debug further:
+
+Print the values of hash, sig, and other variables in your C code to ensure they match what you expect.
+Check if there is any padding or additional data being added or modified by mistake.
+4. File Format Verification
+Since the OpenSSL command is succeeding, but the C code fails, it's worth verifying that your files are in the expected format (PEM, DER, etc.). The OpenSSL command line uses PEM format by default. Make sure the C code is handling the files the same way.
+
+You can explicitly check or convert file formats:
+
+PEM: Use openssl x509 -in software_update.crt -text -noout to verify the certificate format.
+DER: If you're working with DER, use openssl x509 -in software_update.crt -inform DER -text -noout.
+If the files are in DER format, you might need to load them differently in the C code:
+
+c
+Copy code
+X509 *cert = d2i_X509(NULL, &cert_data, cert_len); // For DER format
+By comparing the output from the manual OpenSSL verification with your C code implementation, you should be able to pinpoint where the discrepancies are occurring. Let me know if you need any further assistance!
