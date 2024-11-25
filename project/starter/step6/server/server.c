@@ -8,7 +8,7 @@
 
 #define PORT 8443
 #define BUFFER_SIZE 4096
-#define SOFTWARE_FILE "software_update.bin"
+#define SOFTWARE_FILE "software_package.zip"//"software_update.bin"
 
 void initialize_openssl() {
     SSL_load_error_strings();
