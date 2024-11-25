@@ -14,11 +14,11 @@ Write your code in this editor and press "Run" button to compile and execute it.
 #include <openssl/err.h>
 #include <openssl/sha.h>
 
-#define CERT_FILE "software_update.crt"
+#define CERT_FILE "received_package/software_update.crt"
 #define CA_CERT_FILE "rootCA.crt"
-#define SIGNATURE_FILE "software_update.sig"
-#define UPDATE_FILE "software_update.bin"
-#define CHECKSUM_FILE "software_update.checksum"
+#define SIGNATURE_FILE "received_package/software_update.sig"
+#define UPDATE_FILE "received_package/software_update.bin"
+#define CHECKSUM_FILE "received_package/software_update.checksum"
 
 void handle_openssl_error() {
     ERR_print_errors_fp(stderr);
