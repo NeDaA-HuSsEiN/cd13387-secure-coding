@@ -1,0 +1,286 @@
+labsuser@ip-172-31-26-102:~/cd13387-secure-coding/project/starter/step6$ docker build -t mtls-client ./client
+[+] Building 0.0s (0/1)  docker[+] Building 0.2s (1/2)  docker[+] Building 0.3s (2/3)  docker[+] Building 0.4s (8/9)  docker[+] Building 0.6s (8/9)  docker[+] Building 0.7s (8/9)  docker[+] Building 0.9s (8/9)  docker[+] Building 1.0s (8/9)  docker[+] Building 1.2s (8/9)  docker[+] Building 1.3s (9/9)  docker[+] Building 1.4s (9/10)  docke[+] Building 1.4s (9/10)  docke[+] Building 1.5s (10/10) FINISHED docker:defaultd .doc  0.0s
+ => [internal] load buil  0.0s
+ => => transferring 244B  0.0s
+ => [internal] load meta  0.3s
+ => [internal] load .doc  0.0s
+ => => transferring c 2B  0.0s
+ => [1/5] FROM docker.io  0.0s
+ => [internal] load buil  0.0s
+ => => transferri 7.64kB  0.0s
+ => CACHED [2/5] RUN apt  0.0s
+ => CACHED [3/5] WORKDIR  0.0s
+ => [4/5] COPY . .        0.0s
+ => [5/5] RUN gcc -o cli  0.8s
+ => exporting to image    0.2s
+ => => exporting layers   0.2s
+ => => writing image sha  0.0s
+ => => naming to docker.  0.0s
+labsuser@ip-172-31-26-102:~/cd13387-secure-coding/project/starter/step6$ docker run -it --rm --name client --network mtls-network mtls-client
+root@694a3e4d386d:/app# openssl s_client -connect server:8443 -cert ./client/client.crt -key
+ ./client/client.key 
+Could not open file or uri for loading client certificate private key from ./client/client.key
+800BAED8E07F0000:error:16000069:STORE routines:ossl_store_get0_loader_int:unregistered scheme:../crypto/store/store_register.c:237:scheme=file
+800BAED8E07F0000:error:80000014:system library:file_open:Not a directory:../providers/implementations/storemgmt/file_store.c:267:calling stat(./client/client.key)
+root@694a3e4d386d:/app# openssl s_client -connect server:8443 -cert client.crt -key client.k
+ey
+CONNECTED(00000003)
+Can't use SSL_get_servername
+depth=1 C = US, ST = State, L = City, O = Organization, CN = RootCA
+verify error:num=19:self-signed certificate in certificate chain
+verify return:1
+depth=1 C = US, ST = State, L = City, O = Organization, CN = RootCA
+verify return:1
+depth=0 C = US, ST = State, L = City, O = Organization, CN = Server.CN
+verify return:1
+---
+Certificate chain
+ 0 s:C = US, ST = State, L = City, O = Organization, CN = Server.CN
+   i:C = US, ST = State, L = City, O = Organization, CN = RootCA
+   a:PKEY: rsaEncryption, 2048 (bit); sigalg: RSA-SHA256
+   v:NotBefore: Nov 25 20:22:15 2024 GMT; NotAfter: Nov 25 20:22:15 2025 GMT
+ 1 s:C = US, ST = State, L = City, O = Organization, CN = RootCA
+   i:C = US, ST = State, L = City, O = Organization, CN = RootCA
+   a:PKEY: rsaEncryption, 2048 (bit); sigalg: RSA-SHA256
+   v:NotBefore: Nov 25 20:19:14 2024 GMT; NotAfter: Nov 23 20:19:14 2034 GMT
+---
+Server certificate
+-----BEGIN CERTIFICATE-----
+MIIDMjCCAhoCFEZ0sq+w+tJOwCWokrn5aX57tgzjMA0GCSqGSIb3DQEBCwUAMFQx
+CzAJBgNVBAYTAlVTMQ4wDAYDVQQIDAVTdGF0ZTENMAsGA1UEBwwEQ2l0eTEVMBMG
+A1UECgwMT3JnYW5pemF0aW9uMQ8wDQYDVQQDDAZSb290Q0EwHhcNMjQxMTI1MjAy
+MjE1WhcNMjUxMTI1MjAyMjE1WjBXMQswCQYDVQQGEwJVUzEOMAwGA1UECAwFU3Rh
+dGUxDTALBgNVBAcMBENpdHkxFTATBgNVBAoMDE9yZ2FuaXphdGlvbjESMBAGA1UE
+AwwJU2VydmVyLkNOMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtCKz
+JIk8hLkofijny89RXQWkXhdIYA6yoeMmJHAIxcdpE8nKXM73a4mMf8QMRPjOXlpr
+c6OzJmLFNoC+YELZhkiZmZSQ9W3ZZUHrNi8eaF0nEEluQIn2O/vLacdffaouUWx2
+gSiP6Q37Cj0iFgfC4k4OSYN9ZHBGBAANZNNezmNWCsgnBbBiElHmqmugssSfl4md
+ABYtxoMsi9ZutcRQVqUGuJ36aZQY51TU5dSMvi1rGaDb2IanJCwzZW9i69qx8Uzc
+anssqboTKGutPjL4jsp8P2Ds46LFL3Zi9plBwlYvs6bAyGWbFlNhKx8aCNCRouYf
+3V5Yvs6oK7gwbhprvwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQBsxg99Yr7lFWku
+vCcgj9xfLxtMbhRFt9vWqSfqEQsdmyN6tqVByFJd30ZgI4nCHY64D7Q526RBwfpa
+CcBsyeayNdJ8rG/6thb89WMkrav1yRL93qCSCXIFCy1dkuwmS8vzCNaGo+j5+6sE
+nga0oXbekIC4QfmkUDW14Ix3PFB5xTng4vZ6oDRHMQDMCPSc5weAka6oHBWwolWX
+X3ggNuMMozMp0Lk2jKBW3eNBdRXoBk/6URrtQfeb3V4CvsYQqNG2zpx9N1VjI8Ub
+Jez1LknCYbgBsH72DVpHahRedz2ruusPTmxNm+HcUxr8A1bKFEie0GNsvVFRwMJw
+cHC9VTpH
+-----END CERTIFICATE-----
+subject=C = US, ST = State, L = City, O = Organization, CN = Server.CN
+issuer=C = US, ST = State, L = City, O = Organization, CN = RootCA
+---
+No client certificate CA names sent
+Requested Signature Algorithms: ECDSA+SHA256:ECDSA+SHA384:ECDSA+SHA512:Ed25519:Ed448:RSA-PSS+SHA256:RSA-PSS+SHA384:RSA-PSS+SHA512:RSA-PSS+SHA256:RSA-PSS+SHA384:RSA-PSS+SHA512:RSA+SHA256:RSA+SHA384:RSA+SHA512:ECDSA+SHA224:RSA+SHA224
+Shared Requested Signature Algorithms: ECDSA+SHA256:ECDSA+SHA384:ECDSA+SHA512:Ed25519:Ed448:RSA-PSS+SHA256:RSA-PSS+SHA384:RSA-PSS+SHA512:RSA-PSS+SHA256:RSA-PSS+SHA384:RSA-PSS+SHA512:RSA+SHA256:RSA+SHA384:RSA+SHA512
+Peer signing digest: SHA256
+Peer signature type: RSA-PSS
+Server Temp Key: X25519, 253 bits
+---
+SSL handshake has read 2359 bytes and written 1520 bytes
+Verification error: self-signed certificate in certificate chain
+---
+New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
+Server public key is 2048 bit
+Secure Renegotiation IS NOT supported
+Compression: NONE
+Expansion: NONE
+No ALPN negotiated
+Early data was not sent
+Verify return code: 19 (self-signed certificate in certificate chain)
+---
+---
+Post-Handshake New Session Ticket arrived:
+SSL-Session:
+    Protocol  : TLSv1.3
+    Cipher    : TLS_AES_256_GCM_SHA384
+    Session-ID: 9A75138062A97EA0CBC0F480BD16188218A43C5E52C57FCD2CD189D219B393EB
+    Session-ID-ctx: 
+    Resumption PSK: E57824430AA3788B5815F66D2765A93DD08FA05B2F2B2936E026B9974031248CC57B9E7117AB5376E0C1CE0B354C4E4B
+    PSK identity: None
+    PSK identity hint: None
+    SRP username: None
+    TLS session ticket lifetime hint: 7200 (seconds)
+    TLS session ticket:
+    0000 - 47 f6 b4 6d 5d 89 27 1c-a8 c4 6b e2 f4 56 32 58   G..m].'...k..V2X
+    0010 - 5c 82 55 96 5d 67 cf 53-5d 6b f0 2d eb 29 d7 c7   \.U.]g.S]k.-.)..
+    0020 - 81 8b f7 ea 62 58 47 69-d2 68 60 9f a5 79 26 3e   ....bXGi.h`..y&>
+    0030 - 94 09 28 55 a8 df df 1b-03 f7 fd 3c 19 b4 01 10   ..(U.......<....
+    0040 - d3 62 20 ae bc d5 ca 6e-c4 b9 05 d8 81 17 f3 9f   .b ....n........
+    0050 - 61 66 3e 13 a0 5e ad 23-eb 30 2a 10 5c ca e2 64   af>..^.#.0*.\..d
+    0060 - 21 8d 61 d9 1e 97 df 7e-7b cb f7 c6 42 79 ba 2d   !.a....~{...By.-
+    0070 - 5d 00 28 fc b9 0d 78 d6-a6 f4 f6 0a 0f 1b 41 f4   ].(...x.......A.
+    0080 - c9 a1 a0 76 34 4b cb b3-c2 90 0f bf d0 35 42 82   ...v4K.......5B.
+    0090 - 0e 61 48 ca 94 e3 67 7d-dd 17 7f 98 f1 0c 29 a6   .aH...g}......).
+    00a0 - 6c f4 43 bd f5 dd d4 9d-fc c1 c3 ef d7 9d e7 71   l.C............q
+    00b0 - 7e fa f8 8a bb f0 e6 16-ce 38 99 66 56 40 67 6f   ~........8.fV@go
+    00c0 - 4d d7 61 e8 67 ed 66 1e-aa 5e 9e 3c 12 f6 db 7e   M.a.g.f..^.<...~
+    00d0 - 9e 02 70 6d fd 41 12 d9-80 d1 36 77 02 60 90 4e   ..pm.A....6w.`.N
+    00e0 - f2 5f a3 29 0a 2c fa 30-9d c4 64 8d ba 71 dd c4   ._.).,.0..d..q..
+    00f0 - a0 7f 38 5d 22 70 fe a3-fa d4 77 61 c0 9a 57 46   ..8]"p....wa..WF
+    0100 - 23 de cd 52 8b 93 aa cd-a4 c6 47 d6 a1 24 54 e1   #..R......G..$T.
+    0110 - 58 d6 64 7f 8f 43 98 3c-ab 87 c6 59 c2 d7 51 53   X.d..C.<...Y..QS
+    0120 - f5 63 86 92 9e 8b 02 d8-d1 8d 9e b7 e1 9e 8b 01   .c..............
+    0130 - b9 d7 1b aa 37 0a 67 fb-64 29 78 5b b6 ee e5 9b   ....7.g.d)x[....
+    0140 - 68 96 8d 72 74 4f f7 55-60 50 46 69 02 65 35 f1   h..rtO.U`PFi.e5.
+    0150 - 4c 28 c1 b6 b1 77 00 4d-7b 51 02 4b 2e 96 c5 99   L(...w.M{Q.K....
+    0160 - 38 c0 29 62 a4 d1 73 0c-2d 5d 4e cb 5e 0d 42 e7   8.)b..s.-]N.^.B.
+    0170 - a2 48 1b 56 6c c2 27 8e-88 64 71 90 01 d1 54 9a   .H.Vl.'..dq...T.
+    0180 - f4 f9 10 5d 3e 8a 1c 68-62 79 b7 9e 21 b6 3a e0   ...]>..hby..!.:.
+    0190 - 5a 25 eb f5 81 eb 00 c5-a0 9a 93 de 10 e5 85 b8   Z%..............
+    01a0 - e9 64 c0 2e da 5a eb 67-84 91 f1 50 cb 5d 22 db   .d...Z.g...P.]".
+    01b0 - e0 db 17 00 95 57 e1 3f-42 c0 0b fd db b3 4c f6   .....W.?B.....L.
+    01c0 - 84 90 a2 8b 4d 81 b2 34-1a 59 1e 00 86 cc 1a ec   ....M..4.Y......
+    01d0 - ce be 08 f5 d3 22 5c 56-30 56 bd 49 0a fa 1b 74   ....."\V0V.I...t
+    01e0 - c8 ba 13 01 f2 a3 8c ca-21 62 a4 be 43 62 4f 15   ........!b..CbO.
+    01f0 - c7 ba f2 5a 2c af 45 d1-64 7b 5d 6a 50 95 ff a5   ...Z,.E.d{]jP...
+    0200 - 87 76 bf 72 50 7a af fa-07 43 2f 39 6d 5f ac 03   .v.rPz...C/9m_..
+    0210 - 2b 18 80 71 55 78 9b 8d-d4 9b 18 3d 5d 5a 11 10   +..qUx.....=]Z..
+    0220 - 5f ff 1e a1 78 34 ef 9e-86 63 57 37 b8 41 ff 92   _...x4...cW7.A..
+    0230 - da 52 00 c3 ec 72 d6 14-5b 92 2e a4 dd b5 e9 78   .R...r..[......x
+    0240 - d0 29 82 f3 18 43 46 29-61 7e db 96 ea a6 b5 ac   .)...CF)a~......
+    0250 - 3a 1f 98 b2 d9 63 aa 62-a2 7c 45 d2 fb 98 14 fd   :....c.b.|E.....
+    0260 - 21 d8 66 f8 5e fe 53 f9-f2 38 86 89 5d 1f ab 19   !.f.^.S..8..]...
+    0270 - 4c 35 ba 33 24 8c 5b 6d-b8 3d 00 50 55 80 a9 5c   L5.3$.[m.=.PU..\
+    0280 - 45 45 23 4a 61 24 78 32-30 a6 b2 32 c0 96 f7 8a   EE#Ja$x20..2....
+    0290 - 90 f5 2c 3b 84 32 52 5f-d3 df b2 4b 08 36 a9 ab   ..,;.2R_...K.6..
+    02a0 - 6e 33 6a ab 8e 07 24 ef-cc cb 35 2f ee 4e 59 29   n3j...$...5/.NY)
+    02b0 - 53 44 a9 04 54 63 9c 83-5c 7e c8 24 81 2d 5f d1   SD..Tc..\~.$.-_.
+    02c0 - 97 e2 51 9e e3 ab b4 d1-84 02 39 40 34 98 51 57   ..Q.......9@4.QW
+    02d0 - 10 c6 aa f1 6c 69 5c 09-2d 62 16 c9 89 bc 47 59   ....li\.-b....GY
+    02e0 - b8 94 f0 22 42 d3 d1 6b-5a c4 83 1f f5 20 44 64   ..."B..kZ.... Dd
+    02f0 - f6 a9 74 b9 c2 92 9d bb-af a0 62 b5 88 da 32 6a   ..t.......b...2j
+    0300 - 70 a6 12 7f f7 ed 5d 43-c7 50 72 f1 7e 92 02 ec   p.....]C.Pr.~...
+    0310 - 94 93 3f 04 72 23 92 bb-69 f7 e7 50 af 7a 8b f6   ..?.r#..i..P.z..
+    0320 - 2c 24 a9 ab 46 f9 10 8f-38 45 a3 64 08 dd cb d0   ,$..F...8E.d....
+    0330 - 2f 1b 54 a5 62 ff ce 37-74 00 f3 ec 62 e8 37 1f   /.T.b..7t...b.7.
+    0340 - ea ad f6 73 c7 c2 56 21-12 06 57 d1 1f c6 e0 b7   ...s..V!..W.....
+    0350 - 2b 47 39 fc 6d e5 e5 f8-5f 3b f8 7a e9 be c2 6f   +G9.m..._;.z...o
+    0360 - 47 88 70 d6 2e 98 25 b3-4e 28 b0 3b cb 8a 44 3d   G.p...%.N(.;..D=
+    0370 - 9a 32 79 ed e7 80 f3 c1-3e 99 4a 55 55 af 98 19   .2y.....>.JUU...
+    0380 - 6b ed 97 d7 54 cb d9 44-a4 3f e0 8e 46 cb 28 d3   k...T..D.?..F.(.
+    0390 - 14 d8 7e 2f 27 bf 13 80-c5 85 31 a7 a8 d2 9c ee   ..~/'.....1.....
+    03a0 - c0 6a 2c fe 5e b9 16 ba-81 6a 10 84 90 bf e7 82   .j,.^....j......
+    03b0 - 5c d2 d5 88 06 f0 4f 94-f4 6d 71 05 ec c0 e1 60   \.....O..mq....`
+    03c0 - 87 06 8e c3 cf 12 2d 35-ad 94 cf 17 d0 f3 b2 d8   ......-5........
+    03d0 - 1b bc 2c bd fe 48 06 db-2d e8 db 5c 05 ae 6f 74   ..,..H..-..\..ot
+    03e0 - 9e 0f c7 2b 65 76 e8 7f-9a ed 45 8d dd 94 36 56   ...+ev....E...6V
+    03f0 - 42 de 07 85 33 34 b9 9f-77 f1 9f c2 d3 ad c4 20   B...34..w...... 
+
+    Start Time: 1732566833
+    Timeout   : 7200 (sec)
+    Verify return code: 19 (self-signed certificate in certificate chain)
+    Extended master secret: no
+    Max Early Data: 0
+---
+read R BLOCK
+---
+Post-Handshake New Session Ticket arrived:
+SSL-Session:
+    Protocol  : TLSv1.3
+    Cipher    : TLS_AES_256_GCM_SHA384
+    Session-ID: 72C5A2BF19BF3C63FC567DE3082620A517B044671DB14867035F922BC1871063
+    Session-ID-ctx: 
+    Resumption PSK: 81725442F3A143292F86E87893465CFED046FC11F339C9298E136B40E048D5345A32357AAC9AA3E509576C3D5CE8CCD0
+    PSK identity: None
+    PSK identity hint: None
+    SRP username: None
+    TLS session ticket lifetime hint: 7200 (seconds)
+    TLS session ticket:
+    0000 - 47 f6 b4 6d 5d 89 27 1c-a8 c4 6b e2 f4 56 32 58   G..m].'...k..V2X
+    0010 - b3 f3 22 ee 39 64 c1 a1-26 48 c9 a3 2a 3f 34 59   ..".9d..&H..*?4Y
+    0020 - e4 a3 51 bb 79 47 58 8e-a1 e9 af 03 82 71 0e c7   ..Q.yGX......q..
+    0030 - 9e 60 9d e3 ca c6 ed 8a-86 df 63 24 61 2c 1c a6   .`........c$a,..
+    0040 - 79 67 bc d7 64 35 e8 9b-3c 5d f7 09 bc 34 dd e5   yg..d5..<]...4..
+    0050 - 3f ac 1e 92 fb 0d 4e 59-61 a9 a2 01 a7 04 35 58   ?.....NYa.....5X
+    0060 - cf cc dd 01 e0 4d b7 a1-d9 84 43 fd c9 92 18 c7   .....M....C.....
+    0070 - 80 81 af 3a 54 0f 2d b3-7e 85 64 b3 1e f0 89 06   ...:T.-.~.d.....
+    0080 - 72 71 43 b1 11 79 6b 60-d4 5d 9f fe c5 75 dc 91   rqC..yk`.]...u..
+    0090 - 36 38 b5 3c d8 72 79 f5-58 65 8e d4 d1 68 23 a4   68.<.ry.Xe...h#.
+    00a0 - ac 55 66 1f 28 4e c3 6c-99 ae d8 ed a5 16 af 76   .Uf.(N.l.......v
+    00b0 - e0 01 6d e7 f7 52 8e 12-05 e6 49 77 de 9c 45 c9   ..m..R....Iw..E.
+    00c0 - 7b 0b 55 65 b1 c0 46 05-e2 e0 49 85 82 00 49 e7   {.Ue..F...I...I.
+    00d0 - a7 8f 3a fe b7 0e 56 27-b3 c8 2b 27 5e 18 97 1b   ..:...V'..+'^...
+    00e0 - 21 84 a8 17 f8 d7 e9 bf-a0 53 df 2a f7 7a 0b 3e   !........S.*.z.>
+    00f0 - 0c 25 ae f2 00 d1 05 18-45 a9 ad a5 bc f2 7f 7e   .%......E......~
+    0100 - 79 52 6a 4a f4 a4 0a 07-58 0f d9 be 95 24 8b 5c   yRjJ....X....$.\
+    0110 - 26 d7 0a 15 0d 65 01 1a-dd 64 7a db f6 63 da f2   &....e...dz..c..
+    0120 - 40 cd 60 26 14 ae a7 01-0e 08 db 2f 7f 93 1e ad   @.`&......./....
+    0130 - bb 6a 4d 7d e7 6e d8 8b-8d eb 04 8d ce ce dd 30   .jM}.n.........0
+    0140 - 02 a5 6d f2 a8 04 02 44-a3 fa d7 0c 31 a7 ae 42   ..m....D....1..B
+    0150 - 9b 4c 71 e9 97 73 c2 6e-76 14 e2 20 eb d1 4f 7e   .Lq..s.nv.. ..O~
+    0160 - 23 bb d3 fd a6 bc 18 cf-c1 34 bb 16 cc 56 44 fe   #........4...VD.
+    0170 - f1 c9 03 3e 03 be f9 d5-3c 02 29 af 75 68 10 0f   ...>....<.).uh..
+    0180 - fe 7e 5d e4 3c 8c 4e 6e-48 fc b1 68 93 2c cf b7   .~].<.NnH..h.,..
+    0190 - 1d 0e cc 50 1e 85 4d df-10 ea 6c 8a 4e 67 7a f7   ...P..M...l.Ngz.
+    01a0 - 6c b1 e3 93 4e 52 7c 37-aa fa 1c 0c d7 36 b8 dd   l...NR|7.....6..
+    01b0 - c5 9a 7e ef 6c 6a a8 a6-8d 8b 0d 7b d7 f5 64 27   ..~.lj.....{..d'
+    01c0 - 83 07 e8 1b 04 45 95 de-7d 8e e4 36 23 25 c6 1a   .....E..}..6#%..
+    01d0 - f1 ab cd 66 af df 1d d4-df 7b b6 b4 f2 df 81 93   ...f.....{......
+    01e0 - ae f3 87 1b 0e 97 47 bc-c6 4f 7e 46 45 46 ed 49   ......G..O~FEF.I
+    01f0 - 37 ea cc 61 dc a5 ae f4-29 62 48 1f 64 10 6d 32   7..a....)bH.d.m2
+    0200 - e4 44 57 21 15 22 4e a4-7b 60 58 83 91 f6 2c 5f   .DW!."N.{`X...,_
+    0210 - fb 08 ae 67 18 89 18 71-dd 87 67 76 ab 44 92 5a   ...g...q..gv.D.Z
+    0220 - 86 17 ec 6b 05 e9 26 1c-fa f6 93 f8 23 7f e5 f2   ...k..&.....#...
+    0230 - 76 25 29 88 b4 ca e9 7e-48 57 13 28 81 2a d0 85   v%)....~HW.(.*..
+    0240 - 9b 58 67 f2 5e d8 44 cf-11 f9 f1 84 cc bc 74 6e   .Xg.^.D.......tn
+    0250 - 28 dd 8f 34 a1 74 61 65-68 1f c9 b0 df 05 1c 15   (..4.taeh.......
+    0260 - 32 7b dd db df f9 42 27-0b 2c b8 d0 61 ff a5 fe   2{....B'.,..a...
+    0270 - fb 7f 00 a6 b3 bb 7d bd-f1 ab 4a 6f bc 69 23 d2   ......}...Jo.i#.
+    0280 - 0b 33 c6 b1 d2 d9 96 6e-00 31 15 7f 2e c9 6f 78   .3.....n.1....ox
+    0290 - 20 e7 3c 76 47 2e f5 1a-bf c3 20 a9 33 69 2f 5e    .<vG..... .3i/^
+    02a0 - b3 e5 e8 2d 8b e4 06 1c-ea f2 02 1d 97 83 c2 e5   ...-............
+    02b0 - 22 ab ac 3a 6e 8a ee c2-1d 17 c4 b1 f8 2e 07 fc   "..:n...........
+    02c0 - ba a9 60 da cc 9e 6f f3-a4 7b e1 bd c2 2a e1 da   ..`...o..{...*..
+    02d0 - 30 3a 5a c0 e6 8b b2 8a-f1 86 04 60 d7 82 b4 63   0:Z........`...c
+    02e0 - b0 87 ea 87 e7 5b 80 a0-29 97 e4 84 8d 2b 14 96   .....[..)....+..
+    02f0 - fe 4d b5 21 53 f8 74 c7-f0 92 a8 bb 3a 73 67 7f   .M.!S.t.....:sg.
+    0300 - 70 9b 06 bb 0e a5 bc 88-60 8c 47 27 2d 68 5f b6   p.......`.G'-h_.
+    0310 - a8 e6 a3 47 d2 9f d4 06-a0 3c 75 32 ff a7 e7 03   ...G.....<u2....
+    0320 - b0 03 4c 41 7d a4 67 bb-5d a7 36 c5 42 93 46 02   ..LA}.g.].6.B.F.
+    0330 - 1a 78 66 91 ba b3 c3 ed-65 59 d1 b3 69 62 8a df   .xf.....eY..ib..
+    0340 - b3 fa 5f d3 a5 92 08 1a-df 56 a1 fa 61 ca df 97   .._......V..a...
+    0350 - 57 62 74 67 5b fe ef 87-1c b0 6c e5 c7 3a 08 ed   Wbtg[.....l..:..
+    0360 - e6 30 7f e3 da 32 18 bb-9e da 84 c9 69 ae 15 ca   .0...2......i...
+    0370 - 50 95 de b5 cd a0 07 dd-57 a0 6e 0d f3 0c 05 b6   P.......W.n.....
+    0380 - 02 47 d7 e0 de 83 f7 80-ae 34 38 77 00 35 c3 d3   .G.......48w.5..
+    0390 - 44 7b 87 10 1a b5 64 67-6e cd ef a8 7d cc 39 2f   D{....dgn...}.9/
+    03a0 - 65 f7 e0 a3 1e c3 41 a5-d0 01 c3 46 cd 39 9b 45   e.....A....F.9.E
+    03b0 - 05 80 30 d9 f2 c2 a1 49-6d 66 1b 3a c2 de 82 35   ..0....Imf.:...5
+    03c0 - 8b 6e 2c b5 ee 8a 92 81-fa 41 d8 5a b0 7e 05 96   .n,......A.Z.~..
+    03d0 - d3 81 2d e7 ab 45 7b a7-2c b2 b2 32 00 33 8b 0b   ..-..E{.,..2.3..
+    03e0 - b3 db e1 0c 1d cd ba c1-92 5a cf 40 9f 99 fc bb   .........Z.@....
+    03f0 - 84 e7 96 e9 f9 5f 2a e1-ad ac 11 2b 83 7f a4 57   ....._*....+...W
+
+    Start Time: 1732566833
+    Timeout   : 7200 (sec)
+    Verify return code: 19 (self-signed certificate in certificate chain)
+    Extended master secret: no
+    Max Early Data: 0
+---
+read R BLOCK
+SOFTWAREUPDATEܭl�-J�ʢ�������"0��4�}��U��Da"���")3�Nɐ�a�i@Er������]��)TU������QCS���u*�@����:zt�#��b�Ǖ(����c�)��I�z�K3us�!��]j��'�i�w�?!��)�}[��t�BI�"���U���8����,�(/���{��I��a@N��x��TO%�v�bG�!�zs���n��g�S����+^���*!�&�r�p��_k~�囵��zU��~Ƀ�E������+�z�M�lIs���P���yq��A��.ҫ��^H�/�|���##>GR>�����_�ߗ��A'���7�v���̊�it��   �zCO|�ɯ�>�YNl��~�j�8�(���[\˒u��,��b�L%�X���r3�����ib����7V�i�ƹխ����KuE�a���'v��]d���R��:�n%��"���j6h!
+�_KC?cSg,Y�LN�>O�3N�9�D�r�]���N��Ă}�H   G��q���ёm�:�N:�����df�)R�-��8��0<�*}?Z���Y��غ2��]Kǿ�JU����ΐD{2
+;rj��6Q�Ut��]���b
+                 e�:?��x:j^�˗Oף.�-�B}5v��"ak����i$={��G�QJ�9k@�c]�(g�
+                       �$'��5N����Y}dl�S����}cL5(g�&~"�@��}Y����=]v�H�8h�k���\d��?���g9�m�z���dR7-�������d�#�Q�͝|���
+                       �����3₍��O       ���7-�j��Wх5Yd�B>��pP��O�a�צ�m�f3����,.��E�<���y��ӌF�t����]daq�=��_䥊��R�   �ϓ��VP#�&]��`���y�2�c��,9�_�/���i�V˱�J�H�=��#D[yNɄC�
+                              ���<���u�q�6���\hLCHECKSUMclosed
+root@694a3e4d386d:/app# ./client
+Connecting to server at IP: 172.18.0.2, Port: 8443
+Connected to server successfully.
+Connected to server, receiving file...
+File received and saved as received_update.bin
+root@694a3e4d386d:/app# cat received_update.bin |strings
+SOFTWAREUPDATE
+K3us
+##>GR>
+zCO|
+j6h!
+_KC?cSg,Y
+*}?Z
+x:j^
+B}5v
+i$={
+Y}dl
+}cL5
+]daq
+\hLCHECKSUM
