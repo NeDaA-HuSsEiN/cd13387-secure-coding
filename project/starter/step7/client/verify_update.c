@@ -7,6 +7,12 @@
 #include <openssl/x509.h>
 #include <openssl/x509_vfy.h>
 
+#define ROOT_CA_CRT                "rootCA.crt"
+#define SW_UPDATE_CRT              "received_package/software_update.crt"
+#define SW_UPDATE_BIN              "received_package/software_update.bin"
+#define SW_UPDATE_SIG              "received_package/software_update.sig"
+#define SW_UPDATE_CHCK_SUM         "received_package/software_update.checksum"
+
 // Macro to check conditions and print errors
 #define CHECK(condition, message) \
     if (!(condition)) { \
@@ -88,27 +94,21 @@ int verify_signature(const char *crt_file, const char *sig_file, const char *bin
     FILE *bin_fp = fopen(bin_file, "rb");
     CHECK(bin_fp != NULL, "Failed to open binary file.");
 
-    // Hash the binary file using SHA256
-    unsigned char hash[EVP_MAX_MD_SIZE];
-    unsigned int hash_len = 0;
-    EVP_MD_CTX *hash_ctx = EVP_MD_CTX_new();
-    CHECK(hash_ctx != NULL, "Failed to create hash context.");
-    CHECK(EVP_DigestInit_ex(hash_ctx, EVP_sha256(), NULL) == 1, "Failed to initialize hash context.");
+    // Set up a digest context for verification
+    EVP_MD_CTX *md_ctx = EVP_MD_CTX_new();
+    CHECK(md_ctx != NULL, "Failed to create EVP_MD_CTX.");
+    CHECK(EVP_DigestVerifyInit(md_ctx, NULL, EVP_sha256(), NULL, pubkey) == 1, "Failed to initialize DigestVerify.");
 
+    // Incrementally hash the binary file while verifying
     unsigned char buffer[1024];
     size_t bytes_read;
     while ((bytes_read = fread(buffer, 1, sizeof(buffer), bin_fp)) > 0) {
-        CHECK(EVP_DigestUpdate(hash_ctx, buffer, bytes_read) == 1, "Failed to update hash.");
+        CHECK(EVP_DigestVerifyUpdate(md_ctx, buffer, bytes_read) == 1, "Failed to update DigestVerify.");
     }
     fclose(bin_fp);
-    CHECK(EVP_DigestFinal_ex(hash_ctx, hash, &hash_len) == 1, "Failed to finalize hash.");
-    EVP_MD_CTX_free(hash_ctx);
 
-    // Verify the signature against the hash
-    EVP_MD_CTX *md_ctx = EVP_MD_CTX_new();
-    CHECK(md_ctx != NULL, "Failed to create EVP_MD_CTX.");
-    int result = EVP_DigestVerifyInit(md_ctx, NULL, EVP_sha256(), NULL, pubkey) == 1 &&
-                 EVP_DigestVerify(md_ctx, sig, sig_len, hash, hash_len) == 1;
+    // Verify the signature
+    int result = EVP_DigestVerify(md_ctx, sig, sig_len, NULL, 0) == 1;
 
     // Clean up resources
     free(sig);
@@ -156,16 +156,11 @@ int verify_checksum(const char *bin_file, const char *checksum_file) {
     }
 
     // Compare the computed checksum with the expected checksum
-    return strcmp(expected_checksum, actual_checksum) == 0;
+    return strncmp(expected_checksum, actual_checksum, 65) == 0;
 }
 
 // Main function to verify the software update
 int main() {
-    const char *root_ca_crt = "rootCA.crt";
-    const char *update_crt = "received_package/software_update.crt";
-    const char *update_sig = "received_package/software_update.sig";
-    const char *update_bin = "received_package/software_update.bin";
-    const char *update_checksum = "received_package/software_update.checksum";
 
     // Load OpenSSL libraries
     OpenSSL_add_all_algorithms();
@@ -174,15 +169,15 @@ int main() {
     printf("Verifying software update...\n");
 
     // Verify the certificate is signed by the root CA
-    CHECK(verify_certificate(root_ca_crt, update_crt), "Certificate verification failed.");
+    CHECK(verify_certificate(ROOT_CA_CRT, SW_UPDATE_CRT), "Certificate verification failed.");
     printf("Certificate verified successfully.\n");
 
     // Verify the signature of the binary
-    CHECK(verify_signature(update_crt, update_sig, update_bin), "Signature verification failed.");
+    CHECK(verify_signature(SW_UPDATE_CRT, SW_UPDATE_SIG, SW_UPDATE_BIN), "Signature verification failed.");
     printf("Signature verified successfully.\n");
 
     // Verify the checksum of the binary
-    CHECK(verify_checksum(update_bin, update_checksum), "Checksum verification failed.");
+    CHECK(verify_checksum(SW_UPDATE_BIN, SW_UPDATE_CHCK_SUM), "Checksum verification failed.");
     printf("Checksum verified successfully.\n");
 
     printf("Software update is valid.\n");
