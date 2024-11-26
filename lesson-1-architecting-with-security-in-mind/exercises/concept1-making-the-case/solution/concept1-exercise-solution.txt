@@ -1,4 +1,0 @@
-Many embedded systems are part of critical systems, such as vehicles, aircraft, healthcare, critical infrastructure, etc., that can affect safety.
-Thus, due to lack of security or poor security design, cyber attackers may be able to successfully exploit these embedded systems which could have disastrous consequences.
-Implementing security as an afterthought, “bolting-on security”, often restricts the type of security solutions that can be applied and could negatively affect the system performance or user experience. Moreover, fixing vulnerabilities after release is very costly.
-Therefore, it is recommended to build security into the design from the early stages to ensure that an appropriate security solution can be applied and to follow best practices for secure development.

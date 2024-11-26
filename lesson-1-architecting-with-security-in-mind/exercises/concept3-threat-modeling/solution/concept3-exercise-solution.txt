@@ -1,8 +1,0 @@
-1. From the described scenario it is important to identify the use cases, the involved parties and the valuable things to protect, so called assets. From the description we can determine that important assets include:
-Credentials
-Communication messages
-Firmware
-These are things that may contain valuable information that attackers would target.
-Based on the assets, we can consider the different STRIDE categories and identify relevant threats for respective category. The threats are basically what an attacker can do or achieve by targeting a specific asset for a certain STRIDE category, e.g., by spoofing or tampering etc.
-
-

@@ -1,8 +1,0 @@
-2.
-Applicable Methods to Protect Data 
-Organizations can take several measures to protect the users’ privacy when collecting, processing, and storing data.
-For example, organizations should provide a privacy policy that clarifies what data is being collected, how it is used, and with whom it is shared.
-Moreover, users should be given control over their personal information. For example, organizations should allow users to give consent for what data is being collected and also allow users to request that their data be deleted.
-Organizations should also consider how to minimize the collected data and only retain data for specific purposes. Collecting excessive data increases the risk of privacy concerns.
-In addition, various security measures should be implemented for access control with different roles, e.g., who can access the data, modify the data, or delete the data.
-Finally, organizations should be accountable for their data handling and be responsible for privacy compliance. They should also consider specific requirements based on location and industry, such as privacy laws like GDPR (General Data Protection Regulation) in Europe or CCPA (California Consumer Privacy Act) in the US.
