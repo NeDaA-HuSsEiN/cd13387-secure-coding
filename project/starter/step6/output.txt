@@ -1,29 +1,4 @@
-labsuser@ip-172-31-26-102:~/cd13387-secure-coding/project/starter/step6$ docker build -t mtls-client ./client
-[+] Building 0.0s (0/1)  docker[+] Building 0.2s (1/2)  docker[+] Building 0.3s (2/3)  docker[+] Building 0.4s (8/9)  docker[+] Building 0.6s (8/9)  docker[+] Building 0.7s (8/9)  docker[+] Building 0.9s (8/9)  docker[+] Building 1.0s (8/9)  docker[+] Building 1.2s (8/9)  docker[+] Building 1.3s (9/9)  docker[+] Building 1.4s (9/10)  docke[+] Building 1.4s (9/10)  docke[+] Building 1.5s (10/10) FINISHED docker:defaultd .doc  0.0s
- => [internal] load buil  0.0s
- => => transferring 244B  0.0s
- => [internal] load meta  0.3s
- => [internal] load .doc  0.0s
- => => transferring c 2B  0.0s
- => [1/5] FROM docker.io  0.0s
- => [internal] load buil  0.0s
- => => transferri 7.64kB  0.0s
- => CACHED [2/5] RUN apt  0.0s
- => CACHED [3/5] WORKDIR  0.0s
- => [4/5] COPY . .        0.0s
- => [5/5] RUN gcc -o cli  0.8s
- => exporting to image    0.2s
- => => exporting layers   0.2s
- => => writing image sha  0.0s
- => => naming to docker.  0.0s
-labsuser@ip-172-31-26-102:~/cd13387-secure-coding/project/starter/step6$ docker run -it --rm --name client --network mtls-network mtls-client
-root@694a3e4d386d:/app# openssl s_client -connect server:8443 -cert ./client/client.crt -key
- ./client/client.key 
-Could not open file or uri for loading client certificate private key from ./client/client.key
-800BAED8E07F0000:error:16000069:STORE routines:ossl_store_get0_loader_int:unregistered scheme:../crypto/store/store_register.c:237:scheme=file
-800BAED8E07F0000:error:80000014:system library:file_open:Not a directory:../providers/implementations/storemgmt/file_store.c:267:calling stat(./client/client.key)
-root@694a3e4d386d:/app# openssl s_client -connect server:8443 -cert client.crt -key client.k
-ey
+Output of command: openssl s_client -connect server:8443 -cert client.crt -key client.key
 CONNECTED(00000003)
 Can't use SSL_get_servername
 depth=1 C = US, ST = State, L = City, O = Organization, CN = RootCA
@@ -264,12 +239,8 @@ SOFTWAREUPDATEܭl�-J�ʢ�������"0��4�}��U��Da"�
                        �$'��5N����Y}dl�S����}cL5(g�&~"�@��}Y����=]v�H�8h�k���\d��?���g9�m�z���dR7-�������d�#�Q�͝|���
                        �����3₍��O       ���7-�j��Wх5Yd�B>��pP��O�a�צ�m�f3����,.��E�<���y��ӌF�t����]daq�=��_䥊��R�   �ϓ��VP#�&]��`���y�2�c��,9�_�/���i�V˱�J�H�=��#D[yNɄC�
                               ���<���u�q�6���\hLCHECKSUMclosed
-root@694a3e4d386d:/app# ./client
-Connecting to server at IP: 172.18.0.2, Port: 8443
-Connected to server successfully.
-Connected to server, receiving file...
-File received and saved as received_update.bin
-root@694a3e4d386d:/app# cat received_update.bin |strings
+
+Output of command: cat received_update.bin |strings
 SOFTWAREUPDATE
 K3us
 ##>GR>
