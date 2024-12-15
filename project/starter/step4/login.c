@@ -199,7 +199,7 @@ int main() {
         if (check_login(username, password)) {
             printf("Login successful!\n");
 
-            update_failed_attempts(username, fail_attempts);
+            update_failed_attempts(username, 0);
 
             // Command prompt loop
             while (1) {
